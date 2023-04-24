@@ -6,6 +6,7 @@ import (
 
 	"github.com/balazsgrill/extractld"
 	"github.com/balazsgrill/extractld/bc3"
+	"github.com/balazsgrill/extractld/ms"
 	cmd "github.com/balazsgrill/oauthenticator/server"
 )
 
@@ -18,6 +19,12 @@ type mainExtractor struct {
 func (m *mainExtractor) Init() {
 	m.Main.Init()
 	processors, err := bc3.CreateProcessors(m.Provider)
+	if err == nil {
+		m.list.AddAll(processors)
+	} else {
+		log.Println(err)
+	}
+	processors, err = ms.CreateProcessors(m.Provider)
 	if err == nil {
 		m.list.AddAll(processors)
 	} else {

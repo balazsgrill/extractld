@@ -1,13 +1,19 @@
 module github.com/balazsgrill/extractld
 
-go 1.18
+go 1.20
 
 require (
 	github.com/balazsgrill/oauthenticator v0.0.0-20230131174844-7c6759b33a9a
 	github.com/balazsgrill/sparqlupdate v0.0.0-20230108043446-cb1acac570f1
 )
 
-require github.com/knakk/sparql v0.0.0-20220326141742-15797a7da0ca // indirect
+require (
+	github.com/knakk/sparql v0.0.0-20220326141742-15797a7da0ca // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
+	jaytaylor.com/html2text v0.0.0-20211105163654-bc68cce691ba // indirect
+)
 
 require (
 	github.com/balazsgrill/basecamp3 v0.0.0-20230108173528-44f824ab5128
