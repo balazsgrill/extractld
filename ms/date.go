@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	dateURLLayout = "date://2006/01/02"
-	dateURLFormat = "date://%04d/%02d/%02d"
+	dateURLLayout = "date://2006-01-02"
+	dateURLFormat = "date://%04d-%02d-%02d"
 )
 
 type dateProcessor struct {
@@ -26,7 +26,7 @@ func DateUri(t time.Time) rdf.IRI {
 	return schema.Define(fmt.Sprintf(dateURLFormat, t.Year(), t.Month(), t.Day()))
 }
 
-// date://YYYY/MM/DD
+// date://YYYY-MM-DD
 func (p *dateProcessor) Process(url string) (*sparqlupdate.Graph, error) {
 	time, err := time.Parse(dateURLLayout, url)
 	if err != nil {
