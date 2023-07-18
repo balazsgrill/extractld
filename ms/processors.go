@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/balazsgrill/extractld"
-	"github.com/balazsgrill/extractld/ms/data"
 	"github.com/balazsgrill/oauthenticator"
 	"github.com/balazsgrill/oauthenticator/client"
 	"github.com/balazsgrill/sparqlupdate"
@@ -64,14 +63,20 @@ func parseget(ms *client.Oauth2Client, request string, value interface{}) (err e
 	return json.Unmarshal(data, value)
 }
 
+func concaterr(e1, e2 error) error {
+	if e1 == nil {
+		return e2
+	}
+	if e2 == nil {
+		return e1
+	}
+	return fmt.Errorf("%v ; %v", e1, e2)
+}
+
 func (p *msDateProcessor) ProcessDate(start time.Time) (*sparqlupdate.Graph, error) {
 	end := start.Add(24 * time.Hour)
 	result := sparqlupdate.New()
-	return result, MessageListOfInterval(p.ms, result, start, end)
-}
-
-func CalendarView(ms *client.Oauth2Client, start time.Time, end time.Time) (*data.CalendarView, error) {
-	result := &data.CalendarView{}
-	// Format: 2023-01-25T10:03:53.528Z
-	return result, parseget(ms, fmt.Sprintf("me/calendarview?startdatetime=%s&enddatetime=%s", start.Format(time.RFC3339), end.Format(time.RFC3339)), result)
+	err := MessageListOfInterval(p.ms, result, start, end)
+	err = concaterr(err, CalendarViewOfInterval(p.ms, result, start, end))
+	return result, err
 }
