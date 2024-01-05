@@ -3,7 +3,7 @@ package ms
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -23,14 +23,14 @@ type msDateProcessor struct {
 	ms *client.Oauth2Client
 }
 
-func CreateProcessors[C oauthenticator.Config](provider oauthenticator.Provider[C]) ([]extractld.UrlProcessor, error) {
+func CreateProcessors(provider oauthenticator.Provider) ([]extractld.UrlProcessor, error) {
 	configs, err := provider.ConfigsOfType(clientType)
 	if err != nil {
 		return nil, err
 	}
 	var result []extractld.UrlProcessor
 	for _, c := range configs {
-		msgraphclient := client.New(c.Config(), provider.Token(c))
+		msgraphclient := client.New(c.Config(), c.Token())
 		result = append(result, &dateProcessor{
 			DateProcessor: &msDateProcessor{
 				ms: msgraphclient,
@@ -55,11 +55,12 @@ func parseget(ms *client.Oauth2Client, request string, value interface{}) (err e
 		return err
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		log.Println(string(data))
 		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(data))
 	}
+	log.Println(string(data))
 	return json.Unmarshal(data, value)
 }
 

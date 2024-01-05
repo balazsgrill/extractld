@@ -22,7 +22,7 @@ const (
 	clientType = "https://3.basecampapi.com#Basecamp3Client"
 )
 
-func CreateProcessors[C oauthenticator.Config](provider oauthenticator.Provider[C]) ([]extractld.UrlProcessor, error) {
+func CreateProcessors(provider oauthenticator.Provider) ([]extractld.UrlProcessor, error) {
 	configs, err := provider.ConfigsOfType(clientType)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func CreateProcessors[C oauthenticator.Config](provider oauthenticator.Provider[
 		bc := basecamp3.NewByOauth(c.Config())
 		tp := &tokenPersistence{
 			Context:          context.Background(),
-			TokenPersistence: provider.Token(c),
+			TokenPersistence: c.Token(),
 		}
 		bc.TokenPersitence = tp.get
 		result = append(result, &BC3Processor{

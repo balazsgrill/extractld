@@ -2,6 +2,7 @@ package extractld
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/balazsgrill/sparqlupdate"
 )
@@ -43,15 +44,22 @@ func mergeGraph(g1, g2 *sparqlupdate.Graph) *sparqlupdate.Graph {
 	return g1
 }
 
+func lenGraph(g *sparqlupdate.Graph) int {
+	if g == nil {
+		return 0
+	}
+	return g.Length()
+}
+
 func (list *UrlProcessorList) Process(url string) (*sparqlupdate.Graph, error) {
 	var result *sparqlupdate.Graph
 	var err error
 
 	for _, processor := range list.list {
-
 		r, e := processor.Process(url)
 		err = mergeError(err, e)
 		result = mergeGraph(result, r)
+		log.Printf("INFO: uprocessor %v found %d triples", processor, lenGraph(r))
 	}
 
 	return result, err
