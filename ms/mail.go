@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/balazsgrill/extractld"
 	"github.com/balazsgrill/extractld/ms/data"
 	"github.com/balazsgrill/extractld/schema"
 	"github.com/balazsgrill/oauthenticator/client"
@@ -21,6 +22,22 @@ const (
 
 type outlookProcessor struct {
 	ms *client.Oauth2Client
+}
+
+func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) []extractld.Mail {
+	msgs, err := MessagesByReceivedDay(p.ms, start, end)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	result := make([]extractld.Mail, 0, len(msgs.Value))
+	for _, m := range msgs.Value {
+		msg, err := GetMessageByID(p.ms, m.ID)
+		if err != nil {
+			result = append(result, msg)
+		}
+	}
+	return result
 }
 
 func MessagesByReceivedDay(ms *client.Oauth2Client, start time.Time, end time.Time) (*data.MessageList, error) {
@@ -55,18 +72,18 @@ func MessageToGraph(m *data.Message, graph *sparqlupdate.Graph) {
 	graph.AddTriple(msg, schema.DCT_created, rdf.NewTypedLiteral(m.SentDateTime.String(), schema.XSD_DateTime))
 	sender := graph.NewBlank()
 	graph.AddTriple(msg, schema.DCT_creator, sender)
-	graph.AddTriple(sender, schema.FOAF_mbox, schema.Define("mailto:"+m.Sender.Address))
+	graph.AddTriple(sender, schema.FOAF_mbox, schema.Define("mailto:"+m.Sender_.Address))
 
-	if m.Body != nil {
+	if m.Body_ != nil {
 		var content string
-		if m.Body.ContentType == "html" {
+		if m.Body_.ContentType == "html" {
 			var err error
-			content, err = html2text.FromString(m.Body.Content)
+			content, err = html2text.FromString(m.Body_.Content)
 			if err != nil {
 				log.Println(err)
 			}
 		} else {
-			content = m.Body.Content
+			content = m.Body_.Content
 		}
 		graph.AddTriple(msg, schema.SIOC_content, rdf.NewTypedLiteral(content, schema.XSD_String))
 	}
