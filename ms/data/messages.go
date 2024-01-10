@@ -67,6 +67,10 @@ func (d *EmailAddress) Email() string {
 
 var _ extractld.Mail = &Message{}
 
+func (d *Message) Source() string {
+	return d.WebLink
+}
+
 func (d *Message) Sender() extractld.Contact {
 	return d.Sender_
 }

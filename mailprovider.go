@@ -8,6 +8,7 @@ type Contact interface {
 }
 
 type Mail interface {
+	Source() string
 	Sender() Contact
 	Recipients() []Contact
 	Topic() string
