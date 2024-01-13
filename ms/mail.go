@@ -24,12 +24,7 @@ type outlookProcessor struct {
 	ms *client.Oauth2Client
 }
 
-func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) ([]extractld.Mail, error) {
-	msgs, err := MessagesByReceivedDay(p.ms, start, end)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
+func (p *outlookProcessor) extractMailFromMessageList(msgs *data.MessageList) []extractld.Mail {
 	result := make([]extractld.Mail, 0, len(msgs.Value))
 	for _, m := range msgs.Value {
 		msg, err := GetMessageByID(p.ms, m.ID)
@@ -38,6 +33,25 @@ func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) ([]extract
 		} else {
 			log.Println(err)
 		}
+	}
+	return result
+}
+
+func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) ([]extractld.Mail, error) {
+	msgs, err := MessagesByReceivedDay(p.ms, start, end)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	result := p.extractMailFromMessageList(msgs)
+	for strings.HasPrefix(msgs.NextLink, RootURL) {
+		request := strings.TrimPrefix(msgs.NextLink, RootURL)
+		err = parseget(p.ms, request, msgs)
+		if err != nil {
+			log.Println(err)
+			return result, err
+		}
+		result = append(result, p.extractMailFromMessageList(msgs)...)
 	}
 	return result, nil
 }
@@ -48,7 +62,7 @@ func MessagesByReceivedDay(ms *client.Oauth2Client, start time.Time, end time.Ti
 	geturl := "me/messages"
 	values := &url.Values{}
 	values.Add("$select", "ID,Subject,WebLink")
-	values.Add("$filter", fmt.Sprintf("(receivedDateTime ge %s) and (receivedDateTime le %s)", start.Format(time.RFC3339), end.Format(time.RFC3339)))
+	values.Add("$filter", fmt.Sprintf("(receivedDateTime ge %s) and (receivedDateTime le %s) and (flag/flagstatus eq 'flagged')", start.Format(time.RFC3339), end.Format(time.RFC3339)))
 	return result, parseget(ms, geturl+"?"+values.Encode(), result)
 }
 

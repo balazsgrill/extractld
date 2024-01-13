@@ -11,7 +11,8 @@ type Messages struct {
 }
 
 type MessageList struct {
-	Value []ListedMessage `json:"value"`
+	Value    []ListedMessage `json:"value"`
+	NextLink string          `json:"@odata.nextlink"`
 }
 
 type ListedMessage struct {
@@ -98,7 +99,7 @@ func (d *Message) Body() string {
 
 func (d *Message) IsFlagged() bool {
 	if d.Flag != nil {
-		return d.Flag.FlagStatus != "flagged"
+		return d.Flag.FlagStatus == "flagged"
 	}
 	return false
 }
