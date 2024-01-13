@@ -18,6 +18,7 @@ type ExtractorApp struct {
 
 func (m *ExtractorApp) Init() {
 	m.MainApp.Init()
+	m.List = &extractld.UrlProcessorList{}
 	processors, err := bc3.CreateProcessors(m.Provider)
 	if err == nil {
 		m.List.AddAll(processors)
@@ -31,7 +32,11 @@ func (m *ExtractorApp) Init() {
 		log.Println(err)
 	}
 
-	http.HandleFunc("/extract", m.extract)
+	m.MainApp.HttpServeMux().HandleFunc("/extract", m.extract)
+}
+
+func (m *ExtractorApp) MailProviders() []extractld.MailProvider {
+	return extractld.GetProcessors[extractld.MailProvider](m.List)
 }
 
 func (m *ExtractorApp) extract(w http.ResponseWriter, r *http.Request) {

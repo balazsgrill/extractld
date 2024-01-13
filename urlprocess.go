@@ -23,6 +23,16 @@ func (list *UrlProcessorList) AddAll(processors []UrlProcessor) {
 	list.list = append(list.list, processors...)
 }
 
+func GetProcessors[T any](list *UrlProcessorList) []T {
+	var result []T
+	for _, p := range list.list {
+		if t, ok := p.(T); ok {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func mergeError(e1, e2 error) error {
 	if e1 == nil {
 		return e2

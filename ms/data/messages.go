@@ -1,11 +1,9 @@
 package data
 
 import (
-	"log"
 	"time"
 
 	"github.com/balazsgrill/extractld"
-	"jaytaylor.com/html2text"
 )
 
 type Messages struct {
@@ -67,6 +65,10 @@ func (d *EmailAddress) Email() string {
 
 var _ extractld.Mail = &Message{}
 
+func (d *Message) SentTime() time.Time {
+	return d.SentDateTime
+}
+
 func (d *Message) Source() string {
 	return d.WebLink
 }
@@ -89,17 +91,7 @@ func (d *Message) Topic() string {
 
 func (d *Message) Body() string {
 	if d.Body_ != nil {
-		var content string
-		if d.Body_.ContentType == "html" {
-			var err error
-			content, err = html2text.FromString(d.Body_.Content)
-			if err != nil {
-				log.Println(err)
-			}
-		} else {
-			content = d.Body_.Content
-		}
-		return content
+		return d.Body_.Content
 	}
 	return ""
 }

@@ -14,8 +14,9 @@ type Mail interface {
 	Topic() string
 	Body() string
 	IsFlagged() bool
+	SentTime() time.Time
 }
 
 type MailProvider interface {
-	MailByDate(start time.Time, end time.Time) []Mail
+	MailByDate(start time.Time, end time.Time) ([]Mail, error)
 }

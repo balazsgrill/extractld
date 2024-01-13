@@ -24,20 +24,22 @@ type outlookProcessor struct {
 	ms *client.Oauth2Client
 }
 
-func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) []extractld.Mail {
+func (p *outlookProcessor) MailByDate(start time.Time, end time.Time) ([]extractld.Mail, error) {
 	msgs, err := MessagesByReceivedDay(p.ms, start, end)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 	result := make([]extractld.Mail, 0, len(msgs.Value))
 	for _, m := range msgs.Value {
 		msg, err := GetMessageByID(p.ms, m.ID)
-		if err != nil {
+		if err == nil {
 			result = append(result, msg)
+		} else {
+			log.Println(err)
 		}
 	}
-	return result
+	return result, nil
 }
 
 func MessagesByReceivedDay(ms *client.Oauth2Client, start time.Time, end time.Time) (*data.MessageList, error) {
