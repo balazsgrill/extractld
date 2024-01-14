@@ -51,7 +51,7 @@ func parseget(ms *client.Oauth2Client, request string, value interface{}) (err e
 	log.Println(request)
 	resp, err := get(ms, request)
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return err
 	}
 	defer resp.Body.Close()
